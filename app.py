@@ -102,6 +102,7 @@ with tab1:
 
     # Insertar video de YouTube
     st.video("https://youtu.be/A8_-KQ83DFs")  # Reemplaza con el enlace de tu video
+    st.video("https://youtu.be/SmO42f9jaOY?si=Y2KIvVzR-TIYN4uv")
 
 # Pestaña de Predicción
 with tab2:
