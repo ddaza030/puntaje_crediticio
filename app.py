@@ -18,13 +18,10 @@ def preprocess_data(data):
     # Cargar las columnas categóricas
     categorical_columns = ["grade", "home_ownership", "purpose"]
 
-    print(data)
     # Aplicar codificación one-hot
     data = pd.get_dummies(data, columns=categorical_columns, drop_first=False)
-    print(data)
 
     # Para asegurarnos de que todas las columnas estén presentes, cargamos el conjunto original de columnas de las variables categóricas
-    # Si tienes un DataFrame original con todas las posibles columnas, puedes obtener las columnas en esta forma:
     data_dummies = {
         'grade': ['A', 'B', 'C', 'D', 'E', 'F', 'G'],
         'home_ownership': ['RENT', 'OWN', 'MORTGAGE', 'OTHER', 'NONE', 'ANY'],
@@ -39,8 +36,6 @@ def preprocess_data(data):
 
     # Obtener las columnas en un DataFrame de todas las posibles combinaciones de categorías
     all_columns = list(original_columns.columns)
-
-    print(all_columns)
 
     # Escalar las columnas numéricas
     final_columns = ['loan_amnt', 'int_rate', 'annual_inc', 'open_acc',
@@ -60,26 +55,25 @@ def preprocess_data(data):
                    'last_pymnt_amnt', 'tot_cur_bal', 'total_rev_hi_lim']
 
     data[num_columns] = scaler.transform(data[num_columns])
-    print(data)
     data = data.reindex(columns=final_columns, fill_value=0)
     data = data.astype(float)
 
     data = np.array(data)
-    print(data)
     respuesta = int(modelo.predict(data)[0][0] * 100)
 
     return respuesta
 
 
-# Crear pestañas
-tab1, tab2 = st.tabs(["Documentación", "Predicción"])
+# Sidebar para la navegación
+st.sidebar.title("Navegación")
+option = st.sidebar.radio("Seleccione una opción", ["Documentación", "Predicción"])
 
 # Pestaña de Documentación
-with tab1:
+if option == "Documentación":
     st.markdown("""
     #### Información del Proyecto
     Esta aplicación utiliza un modelo de machine learning para predecir el puntaje crediticio de un usuario basado en diversas características financieras. El modelo fue entrenado con datos históricos.
-    
+
     La información de como se realizó el modelo se encuentra en este [blog](https://deepnote.com/app/alejandra-uribe-sierra-6d3e/Modelo-de-riesgo-de-credito-0d40c66e-6bef-428d-8841-7e7903e9a4a8?utm_source=app-settings&utm_medium=product-shared-content&utm_campaign=data-app&utm_content=0d40c66e-6bef-428d-8841-7e7903e9a4a8)
 
     #### Créditos de Desarrollo:
@@ -105,7 +99,7 @@ with tab1:
     st.video("https://youtu.be/SmO42f9jaOY?si=Y2KIvVzR-TIYN4uv")
 
 # Pestaña de Predicción
-with tab2:
+elif option == "Predicción":
     st.title("Obtenga su puntaje crediticio")
 
     # Crear formulario en Streamlit
