@@ -107,7 +107,7 @@ elif option == "Predicción":
     # Crear formulario en Streamlit
     with st.form("input_form"):
         loan_amnt = st.number_input(
-            "Monto listado del préstamo solicitado por el prestatario.", value=800000)
+            "Monto listado del préstamo solicitado por el prestatario.", value=800)
         emp_length = st.selectbox("Tiempo de empleo",
                                   ['< 1 year', '1 year', '2 years', '3 years', '4 years',
                                    '5 years',
@@ -125,14 +125,14 @@ elif option == "Predicción":
                                 'home_improvement', 'major_purchase', 'medical', 'moving',
                                 'vacation', 'house',
                                 'renewable_energy', 'educational'],
-                               index=6)  # 'home_improvement' está en el índice 6
+                               index=0)  # 'home_improvement' está en el índice 6
 
         open_acc = st.number_input(
             "Número de líneas de crédito abiertas en el historial de crédito del prestatario",
             value=5)
-        annual_inc = st.number_input("El ingreso anual", min_value=1.0, value=60000.0)
+        annual_inc = st.number_input("El ingreso anual", min_value=1.0, value=100000.00)
         pago_mensual_deuda = st.number_input("Pagos mensuales de deudas actuales",
-                                             min_value=0.0, value=500.0)
+                                             min_value=0.0, value=10.0)
 
         # Botón para enviar el formulario
         submit_button = st.form_submit_button("Preprocesar y mostrar datos")
