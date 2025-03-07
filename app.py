@@ -117,7 +117,7 @@ elif option == "Predicción":
 
         home_ownership = st.selectbox("Estado de propiedad de vivienda",
                                       ['RENT', 'OWN', 'MORTGAGE', 'OTHER', 'NONE', 'ANY'],
-                                      index=1)  # 'OWN' está en el índice 1
+                                      index=0)  # 'OWN' está en el índice 1
 
         purpose = st.selectbox("Proposito del prestamo",
                                ['credit_card', 'car', 'small_business', 'other',
