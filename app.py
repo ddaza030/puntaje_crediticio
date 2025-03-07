@@ -10,23 +10,26 @@ st.set_page_config(page_title="Puntaje Crediticio", layout="wide")
 
 # Cargar el MinMaxScaler guardado
 scaler = joblib.load(
-    'minmax_scaler_new.pkl')  # Asegúrate de tener el archivo 'minmax_scaler.pkl' en el directorio adecuado
+    'minmax_scaler_correccion.pkl')  # Asegúrate de tener el archivo 'minmax_scaler.pkl' en el directorio adecuado
 
 
 # Función para preprocesar los datos
 def preprocess_data(data):
     # Cargar las columnas categóricas
-    categorical_columns = ["grade", "home_ownership", "purpose"]
+    categorical_columns = ['emp_length', "home_ownership", "purpose"]
 
     # Aplicar codificación one-hot
     data = pd.get_dummies(data, columns=categorical_columns, drop_first=False)
 
     # Para asegurarnos de que todas las columnas estén presentes, cargamos el conjunto original de columnas de las variables categóricas
     data_dummies = {
-        'grade': ['A', 'B', 'C', 'D', 'E', 'F', 'G'],
+        'emp_length': ['< 1 year', '1 year', '2 years', '3 years', '4 years', '5 years',
+                       '6 years', '7 years', '8 years', '9 years', '10+ years'],
         'home_ownership': ['RENT', 'OWN', 'MORTGAGE', 'OTHER', 'NONE', 'ANY'],
-        'purpose': ['credit_card', 'car', 'small_business', 'other', 'wedding', 'debt_consolidation',
-                    'home_improvement', 'major_purchase', 'medical', 'moving', 'vacation', 'house',
+        'purpose': ['credit_card', 'car', 'small_business', 'other', 'wedding',
+                    'debt_consolidation',
+                    'home_improvement', 'major_purchase', 'medical', 'moving', 'vacation',
+                    'house',
                     'renewable_energy', 'educational'],
     }
 
@@ -38,21 +41,20 @@ def preprocess_data(data):
     all_columns = list(original_columns.columns)
 
     # Escalar las columnas numéricas
-    final_columns = ['loan_amnt', 'int_rate', 'annual_inc', 'open_acc',
-                     'revol_bal', 'total_acc', 'out_prncp', 'total_pymnt', 'total_rec_int',
-                     'last_pymnt_amnt', 'tot_cur_bal', 'total_rev_hi_lim', 'grade_A',
-                     'grade_B', 'grade_C', 'grade_D', 'grade_E', 'grade_F', 'grade_G',
-                     'home_ownership_MORTGAGE', 'home_ownership_NONE',
-                     'home_ownership_OTHER', 'home_ownership_OWN', 'home_ownership_RENT',
-                     'purpose_car', 'purpose_credit_card', 'purpose_debt_consolidation',
-                     'purpose_educational', 'purpose_home_improvement', 'purpose_house',
-                     'purpose_major_purchase', 'purpose_medical', 'purpose_moving',
-                     'purpose_other', 'purpose_renewable_energy', 'purpose_small_business',
-                     'purpose_vacation', 'purpose_wedding']
+    final_columns = ['loan_amnt', 'annual_inc', 'dti', 'open_acc',
+                     'emp_length_1 year', 'emp_length_10+ years', 'emp_length_2 years',
+       'emp_length_3 years', 'emp_length_4 years', 'emp_length_5 years',
+       'emp_length_6 years', 'emp_length_7 years', 'emp_length_8 years',
+       'emp_length_9 years', 'emp_length_< 1 year', 'home_ownership_ANY',
+       'home_ownership_MORTGAGE', 'home_ownership_NONE',
+       'home_ownership_OTHER', 'home_ownership_OWN', 'home_ownership_RENT',
+       'purpose_car', 'purpose_credit_card', 'purpose_debt_consolidation',
+       'purpose_educational', 'purpose_home_improvement', 'purpose_house',
+       'purpose_major_purchase', 'purpose_medical', 'purpose_moving',
+       'purpose_other', 'purpose_renewable_energy', 'purpose_small_business',
+       'purpose_vacation', 'purpose_wedding']
 
-    num_columns = ['loan_amnt', 'int_rate', 'annual_inc', 'open_acc', 'revol_bal',
-                   'total_acc', 'out_prncp', 'total_pymnt', 'total_rec_int',
-                   'last_pymnt_amnt', 'tot_cur_bal', 'total_rev_hi_lim']
+    num_columns = ['loan_amnt', 'annual_inc', 'dti', 'open_acc']
 
     data[num_columns] = scaler.transform(data[num_columns])
     data = data.reindex(columns=final_columns, fill_value=0)
@@ -104,26 +106,33 @@ elif option == "Predicción":
 
     # Crear formulario en Streamlit
     with st.form("input_form"):
-        loan_amnt = st.number_input("Monto listado del préstamo solicitado por el prestatario.")
-        int_rate = st.number_input("Tasa de interés del préstamo.")
-        grade = st.selectbox("Calificación asignada al préstamo por LC.", ['B', 'C', 'A', 'E', 'F', 'D', 'G'])
+        loan_amnt = st.number_input(
+            "Monto listado del préstamo solicitado por el prestatario.", value=800000)
+        emp_length = st.selectbox("Tiempo de empleo",
+                                  ['< 1 year', '1 year', '2 years', '3 years', '4 years',
+                                   '5 years',
+                                   '6 years', '7 years', '8 years', '9 years',
+                                   '10+ years'],
+                                  index=8)  # '9 years' está en el índice 8
+
         home_ownership = st.selectbox("Estado de propiedad de vivienda",
-                                      ['RENT', 'OWN', 'MORTGAGE', 'OTHER', 'NONE', 'ANY'])
-        annual_inc = st.number_input("El ingreso anual", min_value=0.0)
+                                      ['RENT', 'OWN', 'MORTGAGE', 'OTHER', 'NONE', 'ANY'],
+                                      index=1)  # 'OWN' está en el índice 1
+
         purpose = st.selectbox("Proposito del prestamo",
-                               ['credit_card', 'car', 'small_business', 'other', 'wedding', 'debt_consolidation',
-                                'home_improvement', 'major_purchase', 'medical', 'moving', 'vacation', 'house',
-                                'renewable_energy', 'educational'])
-        open_acc = st.number_input("Número de líneas de crédito abiertas en el historial de crédito del prestatario")
-        revol_bal = st.number_input("Saldo total de crédito rotativo")
-        total_acc = st.number_input(
-            "Número total de líneas de crédito actualmente en el historial crediticio del prestatario", min_value=0.0)
-        out_prncp = st.number_input("Principal pendiente restante para el monto total financiado", min_value=0.0)
-        total_pymnt = st.number_input("Pagos recibidos hasta la fecha para el monto total financiado", min_value=0.0)
-        total_rec_int = st.number_input("Intereses recibidos hasta la fecha", min_value=0.0)
-        last_pymnt_amnt = st.number_input("Último monto total del pago recibido.", min_value=0.0)
-        tot_cur_bal = st.number_input("Saldo total actual de todas las cuentas", min_value=0.0)
-        total_rev_hi_lim = st.number_input("Límite de crédito total en líneas de crédito rotativas.", min_value=0.0)
+                               ['credit_card', 'car', 'small_business', 'other',
+                                'wedding', 'debt_consolidation',
+                                'home_improvement', 'major_purchase', 'medical', 'moving',
+                                'vacation', 'house',
+                                'renewable_energy', 'educational'],
+                               index=6)  # 'home_improvement' está en el índice 6
+
+        open_acc = st.number_input(
+            "Número de líneas de crédito abiertas en el historial de crédito del prestatario",
+            value=5)
+        annual_inc = st.number_input("El ingreso anual", min_value=1.0, value=60000.0)
+        pago_mensual_deuda = st.number_input("Pagos mensuales de deudas actuales",
+                                             min_value=0.0, value=500.0)
 
         # Botón para enviar el formulario
         submit_button = st.form_submit_button("Preprocesar y mostrar datos")
@@ -133,20 +142,12 @@ elif option == "Predicción":
         # Crear un DataFrame con los datos ingresados
         input_data = {
             'loan_amnt': [loan_amnt],
-            'int_rate': [int_rate],
-            'grade': [grade],
+            'dti': [(pago_mensual_deuda/(annual_inc/12))*100],
             'home_ownership': [home_ownership],
             'annual_inc': [annual_inc],
             'purpose': [purpose],
             'open_acc': [open_acc],
-            'revol_bal': [revol_bal],
-            'total_acc': [total_acc],
-            'out_prncp': [out_prncp],
-            'total_pymnt': [total_pymnt],
-            'total_rec_int': [total_rec_int],
-            'last_pymnt_amnt': [last_pymnt_amnt],
-            'tot_cur_bal': [tot_cur_bal],
-            'total_rev_hi_lim': [total_rev_hi_lim],
+            'emp_length': [emp_length],
         }
 
         # Convertir a DataFrame
